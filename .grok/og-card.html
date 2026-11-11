@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BOARD</title>
+  <style>
+    @font-face {
+      font-family: "Barlow Condensed";
+      src: url("fonts/BarlowCondensed-ExtraBold.ttf") format("truetype");
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "Barlow Condensed";
+      src: url("fonts/BarlowCondensed-Bold.ttf") format("truetype");
+      font-weight: 700;
+      font-style: normal;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background: #f4efe6;
+      color: #141414;
+    }
+    .card {
+      width: 1200px;
+      height: 630px;
+      padding: 48px 72px 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      position: relative;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 3px solid #141414;
+      pointer-events: none;
+    }
+    .tick {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: #141414;
+    }
+    .tick.tl { top: 16px; left: 16px; }
+    .tick.tr { top: 16px; right: 16px; }
+    .tick.bl { bottom: 16px; left: 16px; }
+    .tick.br { bottom: 16px; right: 16px; }
+    .lockup {
+      text-align: center;
+      position: relative;
+    }
+    .word {
+      font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+      font-weight: 800;
+      font-size: 228px;
+      letter-spacing: -0.045em;
+      line-height: 0.78;
+      color: #141414;
+    }
+    .word i {
+      font-style: normal;
+      color: #e10600;
+    }
+    .sub {
+      margin-top: 14px;
+      font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: 0.22em;
+      line-height: 1;
+    }
+    .month {
+      width: 860px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      font-size: 20px;
+    }
+    .month span:last-child {
+      letter-spacing: 0.28em;
+      font-weight: 700;
+    }
+    .stack {
+      width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chip {
+      width: 100%;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 22px;
+      border-radius: 12px;
+      border: 3px solid #141414;
+      box-shadow: 3px 3px 0 #141414;
+      font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+    .chip b { font-weight: 800; }
+    .chip .tail {
+      letter-spacing: 0.12em;
+      font-size: 26px;
+    }
+    .end { background: #e10600; color: #fff; }
+    .varsity { background: #d8c6ee; color: #24143c; }
+    .engg { background: #c5d7ea; color: #102033; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <i class="tick tl"></i>
+    <i class="tick tr"></i>
+    <i class="tick bl"></i>
+    <i class="tick br"></i>
+    <div class="lockup">
+      <div class="word">B<i>//</i>OARD</div>
+      <div class="sub">ADMISSION + COACHING</div>
+    </div>
+    <div class="month">
+      <span>NOVEMBER</span>
+      <span>SUN–SAT</span>
+    </div>
+    <div class="stack">
+      <div class="chip end"><span>▲ &nbsp;25 · DU</span><span class="tail">END</span></div>
+      <div class="chip varsity"><span>◆ &nbsp;18 · VARSITY</span><span class="tail">PHY 1</span></div>
+      <div class="chip engg"><span>◆ &nbsp;18 · ENGG</span><span class="tail">PHY 1</span></div>
+    </div>
+  </div>
+</body>
+</html>
