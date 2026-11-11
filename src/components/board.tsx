@@ -27,8 +27,8 @@ import {
   type Tone,
 } from "@/lib/board-model";
 
-const WEEK = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-const MAX_CHIPS = 4;
+const WEEK_FULL = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const WEEK_SHORT = ["S", "M", "T", "W", "T", "F", "S"];
 const TONE_CHOICES: { id: Tone; label: string }[] = [
   { id: "end", label: "END" },
   { id: "exam", label: "EXAM" },
@@ -38,6 +38,18 @@ const TONE_CHOICES: { id: Tone; label: string }[] = [
   { id: "custom", label: "CUSTOM" },
 ];
 
+function useIsPhone() {
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const apply = () => setPhone(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+  return phone;
+}
+
 export function Board() {
   const [state, setState] = useState<BoardState>(EMPTY_STATE);
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
@@ -46,6 +58,10 @@ export function Board() {
   const [tip, setTip] = useState<{ event: DeskEvent; x: number; y: number } | null>(null);
   const [ready, setReady] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [dayList, setDayList] = useState<string | null>(null);
+  const isPhone = useIsPhone();
+  const maxChips = isPhone ? 2 : 4;
+  const weekLabels = isPhone ? WEEK_SHORT : WEEK_FULL;
 
   useEffect(() => {
     const loaded = loadState();
@@ -153,15 +169,15 @@ export function Board() {
       <div className="board-scroll">
         <div className="board-inner">
           <div className="week">
-            {WEEK.map((day) => (
-              <span key={day}>{day}</span>
+            {weekLabels.map((day, i) => (
+              <span key={`${day}-${i}`}>{day}</span>
             ))}
           </div>
           <div className="grid">
             {days.map((day) => {
               const key = format(day, "yyyy-MM-dd");
               const mine = events.filter((event) => event.date === key && shown(event));
-              const visible = mine.slice(0, MAX_CHIPS);
+              const visible = mine.slice(0, maxChips);
               const extra = mine.length - visible.length;
               const past = isBefore(day, today) && !isSameDay(day, today);
               const deadline = mine.some((event) => event.tone === "end" || event.tail === "END");
@@ -184,18 +200,22 @@ export function Board() {
                       <Chip
                         key={event.id}
                         event={event}
+                        compact={isPhone}
                         onOpen={() => {
                           setCreating(false);
                           setDraft(event);
                           setTip(null);
                         }}
-                        onHover={(x, y) => setTip({ event, x, y })}
+                        onHover={(x, y) => {
+                          if (isPhone) return;
+                          setTip({ event, x, y });
+                        }}
                         onLeave={() => setTip(null)}
                       />
                     ))}
                     {extra > 0 ? (
-                      <button className="more" type="button" onClick={() => openNew(day)}>
-                        +{extra} MORE
+                      <button className="more" type="button" onClick={() => setDayList(key)}>
+                        +{extra}
                       </button>
                     ) : null}
                   </div>
@@ -237,6 +257,47 @@ export function Board() {
             setCreating(false);
           }}
         />
+      ) : null}
+
+      {dayList ? (
+        <div className="sheet-back" onClick={() => setDayList(null)}>
+          <div className="sheet" onClick={(event) => event.stopPropagation()}>
+            <h2>{format(new Date(`${dayList}T12:00:00`), "d MMM").toUpperCase()}</h2>
+            <p className="hint">All chips on this day. Tap one to edit.</p>
+            <div className="chips" style={{ gap: 8 }}>
+              {events
+                .filter((event) => event.date === dayList && shown(event))
+                .map((event) => (
+                  <Chip
+                    key={event.id}
+                    event={event}
+                    onOpen={() => {
+                      setDayList(null);
+                      setCreating(false);
+                      setDraft(event);
+                    }}
+                    onHover={() => undefined}
+                    onLeave={() => undefined}
+                  />
+                ))}
+            </div>
+            <div className="row-actions">
+              <button
+                className="pill add"
+                type="button"
+                onClick={() => {
+                  setDayList(null);
+                  openNew(new Date(`${dayList}T12:00:00`));
+                }}
+              >
+                ADD
+              </button>
+              <button className="pill" type="button" onClick={() => setDayList(null)}>
+                CLOSE
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
 
       {confirmReset ? (
@@ -302,11 +363,13 @@ function Chip({
   onOpen,
   onHover,
   onLeave,
+  compact = false,
 }: {
   event: DeskEvent;
   onOpen: () => void;
   onHover: (x: number, y: number) => void;
   onLeave: () => void;
+  compact?: boolean;
 }) {
   const custom =
     event.tone === "custom"
@@ -316,6 +379,8 @@ function Chip({
           borderColor: inkFor(event.color || "#e10600"),
         }
       : undefined;
+  const shortLabel =
+    compact && event.label.length > 6 ? event.label.slice(0, 5) : event.label;
   return (
     <button
       type="button"
@@ -337,9 +402,9 @@ function Chip({
     >
       <span className="chip-left">
         <span>{event.symbol}</span>
-        <span>{event.label}</span>
+        <span>{shortLabel}</span>
       </span>
-      <span className="chip-tail">{event.tail}</span>
+      {!compact ? <span className="chip-tail">{event.tail}</span> : null}
     </button>
   );
 }
