@@ -5,12 +5,9 @@ import {
   endOfMonth,
   endOfWeek,
   format,
-  isBefore,
-  isSameDay,
   isSameMonth,
   startOfMonth,
   startOfWeek,
-  startOfToday,
 } from "date-fns";
 import {
   EMPTY_STATE,
@@ -26,6 +23,21 @@ import {
   type SymbolMark,
   type Tone,
 } from "@/lib/board-model";
+
+
+/** Calendar day in Bangladesh — avoids UTC SSR being "yesterday". */
+function dhakaYmd(d: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function parseYmd(ymd: string): Date {
+  return new Date(`${ymd}T12:00:00`);
+}
 
 const WEEK_FULL = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const WEEK_SHORT = ["S", "M", "T", "W", "T", "F", "S"];
@@ -52,7 +64,7 @@ function useIsPhone() {
 
 export function Board() {
   const [state, setState] = useState<BoardState>(EMPTY_STATE);
-  const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
+  const [cursor, setCursor] = useState(() => startOfMonth(parseYmd(dhakaYmd())));
   const [draft, setDraft] = useState<DeskEvent | null>(null);
   const [creating, setCreating] = useState(false);
   const [tip, setTip] = useState<{ event: DeskEvent; x: number; y: number } | null>(null);
@@ -77,7 +89,8 @@ export function Board() {
   }, [state, ready]);
 
   const events = useMemo(() => visibleEvents(state), [state]);
-  const today = startOfToday();
+  const todayKey = dhakaYmd();
+  const today = parseYmd(todayKey);
 
   const days = useMemo(() => {
     const start = startOfWeek(startOfMonth(cursor));
@@ -117,7 +130,7 @@ export function Board() {
 
   function openNew(date: Date) {
     setCreating(true);
-    setDraft(freshEvent(format(date, "yyyy-MM-dd")));
+    setDraft(freshEvent(dhakaYmd(date)));
     setTip(null);
   }
 
@@ -142,7 +155,7 @@ export function Board() {
               ›
             </button>
           </div>
-          <button className="pill" type="button" onClick={() => setCursor(startOfMonth(new Date()))}>
+          <button className="pill" type="button" onClick={() => setCursor(startOfMonth(parseYmd(dhakaYmd())))}>
             TODAY
           </button>
           <LaneToggle lane="uni" label="UNI" state={state} setState={setState} />
@@ -175,11 +188,13 @@ export function Board() {
           </div>
           <div className="grid">
             {days.map((day) => {
-              const key = format(day, "yyyy-MM-dd");
+              const dayKey = dhakaYmd(day);
+              const key = dayKey;
               const mine = events.filter((event) => event.date === key && shown(event));
               const visible = mine.slice(0, maxChips);
               const extra = mine.length - visible.length;
-              const past = isBefore(day, today) && !isSameDay(day, today);
+              const past = dayKey < todayKey;
+              const isToday = dayKey === todayKey;
               const deadline = mine.some((event) => event.tone === "end" || event.tail === "END");
               return (
                 <div
@@ -189,7 +204,7 @@ export function Board() {
                     isSameMonth(day, cursor) ? "" : "out",
                     past ? "past" : "",
                     deadline ? "deadline" : "",
-                    isSameDay(day, today) ? "today" : "",
+                    isToday ? "today" : "",
                   ].join(" ")}
                 >
                   <button className="num" type="button" onClick={() => openNew(day)}>
