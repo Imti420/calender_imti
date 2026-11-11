@@ -7,20 +7,29 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BOARD" },
-      { name: "description", content: "A brutalist month board for admission dates and coaching exams. Edit every chip." },
-      { name: "theme-color", content: "#f4efe6" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "IMTI'S CALENDER" },
+      {
+        name: "description",
+        content: "Admission, mock tests, and important dates. Your brutalist desk calendar.",
+      },
+      { name: "theme-color", content: "#e10600" },
+      { name: "application-name", content: "IMTI'S CALENDER" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "IMTI'S CALENDER" },
+      { name: "mobile-web-app-capable", content: "yes" },
     ],
     links: [
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/icons/favicon-32.png" },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/icons/icon-180.png" },
       { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600;700&display=swap",
       },
-      { rel: "manifest", href: "/__grok/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   component: () => (
