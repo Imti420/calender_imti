@@ -157,8 +157,28 @@ export function renderInstallPageHtml(template, { host, url } = {}) {
     .replaceAll("{{APP_URL}}", escapeHtml(stripInstallParams(url)));
 }
 
-export function renderWebManifest(hostHeader) {
-  const name = appNameFromHost(hostHeader);
+export function readSiteTitle(cwd = process.cwd()) {
+  try {
+    const raw = readFileSync(join(cwd, OG_SITE_REL_PATH), "utf8");
+    const site = JSON.parse(raw);
+    const title = String(site?.title ?? "").trim();
+    if (title) return title;
+  } catch {
+    /* site.json optional at runtime */
+  }
+  return "";
+}
+
+export function renderWebManifest(hostHeader, opts = {}) {
+  const fromSite =
+    String(opts.siteTitle ?? "").trim() ||
+    (opts.site && String(opts.site.title ?? "").trim()) ||
+    readSiteTitle(opts.cwd ?? process.cwd());
+  const fromHost = appNameFromHost(hostHeader);
+  const name =
+    fromSite ||
+    (fromHost && fromHost !== DEFAULT_APP_NAME ? fromHost : "") ||
+    DEFAULT_APP_NAME;
   return JSON.stringify(
     {
       name,
@@ -167,13 +187,26 @@ export function renderWebManifest(hostHeader) {
       start_url: "/",
       scope: "/",
       display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
+      background_color: "#141414",
+      theme_color: "#e10600",
       icons: [
+        {
+          src: "/icons/icon-192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: "/icons/icon-512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any",
+        },
         {
           src: "/__grok/icon-180.png",
           sizes: "180x180",
           type: "image/png",
+          purpose: "any",
         },
       ],
     },
@@ -193,10 +226,14 @@ export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
       `<meta name="apple-mobile-web-app-title" content="${escapeHtml(appName)}">`,
     ],
     [
-      "apple-mobile-web-app-status-bar-style",
-      '<meta name="apple-mobile-web-app-status-bar-style" content="black">',
+      "application-name",
+      `<meta name="application-name" content="${escapeHtml(appName)}">`,
     ],
-    ["theme-color", '<meta name="theme-color" content="#000000">'],
+    [
+      "apple-mobile-web-app-status-bar-style",
+      '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
+    ],
+    ["theme-color", '<meta name="theme-color" content="#e10600">'],
   ];
 }
 
