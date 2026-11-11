@@ -21,9 +21,9 @@ export const Route = createRootRoute({
       { name: "mobile-web-app-capable", content: "yes" },
     ],
     links: [
-      { rel: "icon", type: "image/png", sizes: "32x32", href: "/icons/favicon-32.png" },
+      { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/icons/icon-180.png" },
+      { rel: "apple-touch-icon", href: "/icons/icon.svg" },
       { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
